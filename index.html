@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -64,15 +65,44 @@
       color: #ffffff;
     }
 
-    select {
-      background: #3a3a3a;
-      color: #ffffff;
-      border: none;
-      border-radius: 8px;
-      padding: 6px 10px;
-      font-size: 14px;
-      outline: none;
+    /* Theme grid */
+    .theme-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      padding: 4px 0;
+    }
+
+    .theme-option {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
       cursor: pointer;
+    }
+
+    .theme-circle {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      border: 3px solid transparent;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+
+    .theme-option.selected .theme-circle {
+      border-color: #ffffff;
+      transform: scale(1.1);
+    }
+
+    .theme-option span {
+      font-size: 10px;
+      color: rgba(255,255,255,0.35);
+      text-align: center;
+      line-height: 1.2;
+    }
+
+    .theme-option.selected span {
+      color: #ffffff;
     }
 
     /* Toggle switch */
@@ -110,6 +140,10 @@
       transition: 0.3s;
     }
 
+    .temp-toggle + .slider {
+      background: #FF5500;
+    }
+
     input:checked + .slider {
       background: #FF5500;
     }
@@ -118,21 +152,33 @@
       transform: translateX(20px);
     }
 
-    .theme-preview {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      display: inline-block;
-      margin-right: 8px;
-      vertical-align: middle;
-      border: 2px solid #444;
+    /* Temperature unit slider */
+    .temp-unit-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 4px 0;
+    }
+
+    .temp-label {
+      font-size: 16px;
+      font-weight: 700;
+      color: rgba(255,255,255,0.35);
+      transition: color 0.2s;
+      width: 28px;
+      text-align: center;
+    }
+
+    .temp-label.active {
+      color: #ffffff;
     }
 
     .save-btn {
       display: block;
       width: 100%;
       padding: 14px;
-      background: #FF5500;
+      background: #444;
       color: white;
       border: none;
       border-radius: 12px;
@@ -154,23 +200,49 @@
 
   <h1>BoldFace</h1>
 
+  <!-- Theme -->
   <div class="section">
-    <h2>Theme</h2>
-    <div class="row">
-      <label for="theme">Color Theme</label>
-      <select id="theme">
-        <option value="0">🟠 Tangerine</option>
-        <option value="1">🔵 Blueberry</option>
-        <option value="2">🟢 Lime</option>
-        <option value="3">⚫ Licorice</option>
-        <option value="4">🫒 Avocado</option>
-        <option value="5">🔴 Cherry</option>
-        <option value="6">🟣 Grape</option>
-        <option value="7">🩷 Pink Lemonade</option>
-      </select>
+    <h2>Color Theme</h2>
+    <!-- ROYGBIV order: Cherry, Tangerine, Pink Lemonade, Lime, Avocado, Blueberry, Grape, Licorice -->
+    <!-- Values map to main.c THEME_BG array index -->
+    <div class="theme-grid">
+      <div class="theme-option" data-value="5" onclick="selectTheme(this)">
+        <div class="theme-circle" style="background:#550000;"></div>
+        <span>Cherry</span>
+      </div>
+      <div class="theme-option" data-value="0" onclick="selectTheme(this)">
+        <div class="theme-circle" style="background:#FF5500;"></div>
+        <span>Tangerine</span>
+      </div>
+      <div class="theme-option" data-value="7" onclick="selectTheme(this)">
+        <div class="theme-circle" style="background:#FFFF00;"></div>
+        <span>Pink Lemonade</span>
+      </div>
+      <div class="theme-option" data-value="2" onclick="selectTheme(this)">
+        <div class="theme-circle" style="background:#004400;"></div>
+        <span>Lime</span>
+      </div>
+      <div class="theme-option" data-value="4" onclick="selectTheme(this)">
+        <div class="theme-circle" style="background:#445500;"></div>
+        <span>Avocado</span>
+      </div>
+      <div class="theme-option" data-value="1" onclick="selectTheme(this)">
+        <div class="theme-circle" style="background:#001055;"></div>
+        <span>Blueberry</span>
+      </div>
+      <div class="theme-option" data-value="6" onclick="selectTheme(this)">
+        <div class="theme-circle" style="background:#330044;"></div>
+        <span>Grape</span>
+      </div>
+      <div class="theme-option" data-value="3" onclick="selectTheme(this)">
+        <div class="theme-circle" style="background:#000000; border: 2px solid #333;"></div>
+        <span>Licorice</span>
+      </div>
     </div>
+    <input type="hidden" id="theme" value="0">
   </div>
 
+  <!-- Display toggles -->
   <div class="section">
     <h2>Display</h2>
     <div class="row">
@@ -196,31 +268,55 @@
     </div>
   </div>
 
+  <!-- Temperature unit -->
   <div class="section">
-    <h2>Weather</h2>
-    <div class="row">
-      <label>Use Celsius</label>
+    <h2>Temperature Unit</h2>
+    <div class="temp-unit-row">
+      <span class="temp-label active" id="label_f">F°</span>
       <label class="toggle">
-        <input type="checkbox" id="use_celsius">
+        <input type="checkbox" id="use_celsius" class="temp-toggle" onchange="updateTempLabels()">
         <span class="slider"></span>
       </label>
+      <span class="temp-label" id="label_c">C°</span>
     </div>
   </div>
 
   <button class="save-btn" onclick="save()">Save Settings</button>
 
   <script>
-    // Load saved settings from URL params if present
     function getParam(key, fallback) {
       var params = new URLSearchParams(window.location.search);
       return params.has(key) ? params.get(key) : fallback;
     }
 
-    document.getElementById('theme').value        = getParam('theme', '0');
+    // Theme selection
+    function selectTheme(el) {
+      document.querySelectorAll('.theme-option').forEach(function(o) {
+        o.classList.remove('selected');
+      });
+      el.classList.add('selected');
+      document.getElementById('theme').value = el.getAttribute('data-value');
+    }
+
+    // Temp label update
+    function updateTempLabels() {
+      var isCelsius = document.getElementById('use_celsius').checked;
+      document.getElementById('label_f').classList.toggle('active', !isCelsius);
+      document.getElementById('label_c').classList.toggle('active', isCelsius);
+    }
+
+    // Load saved settings
+    var savedTheme = getParam('theme', '0');
     document.getElementById('show_weather').checked = getParam('show_weather', '1') === '1';
     document.getElementById('show_date').checked    = getParam('show_date', '1') === '1';
     document.getElementById('show_steps').checked   = getParam('show_steps', '1') === '1';
     document.getElementById('use_celsius').checked  = getParam('use_celsius', '0') === '1';
+    document.getElementById('theme').value = savedTheme;
+    updateTempLabels();
+
+    // Highlight saved theme
+    var savedOption = document.querySelector('.theme-option[data-value="' + savedTheme + '"]');
+    if (savedOption) savedOption.classList.add('selected');
 
     function save() {
       var settings = {
