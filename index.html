@@ -193,6 +193,22 @@
       z-index: 100;
     }
 
+    .fade-overlay {
+      position: fixed;
+      bottom: 52px;
+      left: 0;
+      right: 0;
+      height: 72px;
+      background: linear-gradient(to bottom, transparent, #1a1a1a);
+      pointer-events: none;
+      z-index: 99;
+      transition: opacity 0.3s;
+    }
+
+    .fade-overlay.hidden {
+      opacity: 0;
+    }
+
     .save-btn:active {
       background: #cc4400;
     }
@@ -296,9 +312,21 @@
     </div>
   </div>
 
+  <div class="fade-overlay" id="fade-overlay"></div>
   <button class="save-btn" onclick="save()">Save Settings</button>
 
   <script>
+    window.addEventListener('scroll', function() {
+      var scrollBottom = window.innerHeight + window.scrollY;
+      var pageHeight = document.documentElement.scrollHeight;
+      var overlay = document.getElementById('fade-overlay');
+      if (scrollBottom >= pageHeight - 10) {
+        overlay.classList.add('hidden');
+      } else {
+        overlay.classList.remove('hidden');
+      }
+    });
+
     function getParam(key, fallback) {
       var params = new URLSearchParams(window.location.search);
       return params.has(key) ? params.get(key) : fallback;
