@@ -379,18 +379,37 @@
     var savedOption = document.querySelector('.theme-option[data-value="' + savedTheme + '"]');
     if (savedOption) savedOption.classList.add('selected');
 
-    function save() {
-      var settings = {
-        'KEY_THEME':        parseInt(document.getElementById('theme').value),
-        'KEY_SHOW_WEATHER': document.getElementById('show_weather').checked ? 1 : 0,
-        'KEY_SHOW_DATE':    document.getElementById('show_date').checked ? 1 : 0,
-        'KEY_SHOW_STEPS':   document.getElementById('show_steps').checked ? 1 : 0,
-        'KEY_USE_CELSIUS':  document.getElementById('use_celsius').checked ? 1 : 0,
-        'KEY_USE_24H':      document.getElementById('use_24h').checked ? 1 : 0
-      };
-      var location = 'pebblejs://close#' + encodeURIComponent(JSON.stringify(settings));
-      document.location = location;
-    }
+var THEME_NAMES = ['Tangerine','Blueberry','Lime','Licorice','Avocado','Cherry','Grape','Pink Lemonade'];
+
+function save() {
+  var themeIndex  = parseInt(document.getElementById('theme').value);
+  var showWeather = document.getElementById('show_weather').checked;
+  var showDate    = document.getElementById('show_date').checked;
+  var showSteps   = document.getElementById('show_steps').checked;
+  var useCelsius  = document.getElementById('use_celsius').checked;
+  var use24h      = document.getElementById('use_24h').checked;
+
+  var settings = {
+    'KEY_THEME':        themeIndex,
+    'KEY_SHOW_WEATHER': showWeather ? 1 : 0,
+    'KEY_SHOW_DATE':    showDate    ? 1 : 0,
+    'KEY_SHOW_STEPS':   showSteps   ? 1 : 0,
+    'KEY_USE_CELSIUS':  useCelsius  ? 1 : 0,
+    'KEY_USE_24H':      use24h      ? 1 : 0
+  };
+
+  gtag('event', 'save_settings', {
+    'theme':        THEME_NAMES[themeIndex],
+    'show_weather': showWeather ? 'on' : 'off',
+    'show_date':    showDate    ? 'on' : 'off',
+    'show_steps':   showSteps   ? 'on' : 'off',
+    'temp_unit':    useCelsius  ? 'celsius' : 'fahrenheit',
+    'clock_format': use24h      ? '24h' : '12h'
+  });
+
+  var location = 'pebblejs://close#' + encodeURIComponent(JSON.stringify(settings));
+  document.location = location;
+}
   </script>
 
 </body>
