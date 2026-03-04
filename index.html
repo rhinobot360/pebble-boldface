@@ -193,7 +193,7 @@
       position: sticky;
       top: 0;
       z-index: 50;
-      background: #1a1a1a;
+      background: radial-gradient(ellipse at center, #2a2a2a 0%, #111111 70%);
       padding: 0;
       margin: 0 -20px 16px -20px;
     }
@@ -295,10 +295,6 @@
     <!-- ROYGBIV order: Licorice, Cherry, Tangerine, Pink Lemonade, Avocado, Lime, Blueberry, Grape -->
     <!-- Values map to main.c THEME_BG array index -->
     <div class="theme-grid">
-      <div class="theme-option" data-value="3" onclick="selectTheme(this)">
-        <div class="theme-circle" style="background:#000000;"></div>
-        <span>Licorice</span>
-      </div>
       <div class="theme-option" data-value="5" onclick="selectTheme(this)">
         <div class="theme-circle" style="background:#aa0000;"></div>
         <span>Cherry</span>
@@ -326,6 +322,10 @@
       <div class="theme-option" data-value="6" onclick="selectTheme(this)">
         <div class="theme-circle" style="background:#aa00aa;"></div>
         <span>Grape</span>
+      </div>
+      <div class="theme-option" data-value="3" onclick="selectTheme(this)">
+        <div class="theme-circle" style="background:#000000;"></div>
+        <span>Licorice</span>
       </div>
     </div>
     <input type="hidden" id="theme" value="0">
