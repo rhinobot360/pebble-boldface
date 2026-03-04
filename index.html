@@ -256,7 +256,9 @@
   <!-- Watch Preview -->
   <div class="watch-preview" id="watch-preview">
     <img src="watchface-tangerine.png" id="preview-watchface" alt="watchface">
-    <img src="watchface-tangerine-features.png" id="preview-features" class="layer-features" alt="features">
+    <img src="watchface-tangerine-calendar.png" id="preview-calendar" class="layer-features" alt="calendar">
+    <img src="watchface-tangerine-weather.png" id="preview-weather" class="layer-features" alt="weather">
+    <img src="watchface-tangerine-steps.png" id="preview-steps" class="layer-features" alt="steps">
     <img src="pebble-watch.png" id="preview-frame" alt="watch frame">
   </div>
 
@@ -386,15 +388,37 @@
       '7': 'watchface-pink-lemonade.png'
     };
 
-    var THEME_FEATURES = {
-      '0': 'watchface-tangerine-features.png',
-      '1': 'watchface-blueberry-features.png',
-      '2': 'watchface-lime-features.png',
-      '3': 'watchface-licorice-features.png',
-      '4': 'watchface-avocado-features.png',
-      '5': 'watchface-cherry-features.png',
-      '6': 'watchface-grape-features.png',
-      '7': 'watchface-pink-lemonade-features.png'
+    var THEME_CALENDAR = {
+      '0': 'watchface-tangerine-calendar.png',
+      '1': 'watchface-blueberry-calendar.png',
+      '2': 'watchface-lime-calendar.png',
+      '3': 'watchface-licorice-calendar.png',
+      '4': 'watchface-avocado-calendar.png',
+      '5': 'watchface-cherry-calendar.png',
+      '6': 'watchface-grape-calendar.png',
+      '7': 'watchface-pink-lemonade-calendar.png'
+    };
+
+    var THEME_WEATHER = {
+      '0': 'watchface-tangerine-weather.png',
+      '1': 'watchface-blueberry-weather.png',
+      '2': 'watchface-lime-weather.png',
+      '3': 'watchface-licorice-weather.png',
+      '4': 'watchface-avocado-weather.png',
+      '5': 'watchface-cherry-weather.png',
+      '6': 'watchface-grape-weather.png',
+      '7': 'watchface-pink-lemonade-weather.png'
+    };
+
+    var THEME_STEPS = {
+      '0': 'watchface-tangerine-steps.png',
+      '1': 'watchface-blueberry-steps.png',
+      '2': 'watchface-lime-steps.png',
+      '3': 'watchface-licorice-steps.png',
+      '4': 'watchface-avocado-steps.png',
+      '5': 'watchface-cherry-steps.png',
+      '6': 'watchface-grape-steps.png',
+      '7': 'watchface-pink-lemonade-steps.png'
     };
 
     function selectTheme(el) {
@@ -405,7 +429,9 @@
       var val = el.getAttribute('data-value');
       document.getElementById('theme').value = val;
       document.getElementById('preview-watchface').src = THEME_WATCHFACES[val] || 'watchface-tangerine.png';
-      document.getElementById('preview-features').src = THEME_FEATURES[val] || 'watchface-tangerine-features.png';
+      document.getElementById('preview-calendar').src = THEME_CALENDAR[val] || 'watchface-tangerine-calendar.png';
+      document.getElementById('preview-weather').src = THEME_WEATHER[val] || 'watchface-tangerine-weather.png';
+      document.getElementById('preview-steps').src = THEME_STEPS[val] || 'watchface-tangerine-steps.png';
     }
 
     // Temp label update
@@ -413,13 +439,10 @@
       var showWeather = document.getElementById('show_weather').checked;
       var showDate    = document.getElementById('show_date').checked;
       var showSteps   = document.getElementById('show_steps').checked;
-      var anyVisible  = showWeather || showDate || showSteps;
-      var featLayer   = document.getElementById('preview-features');
-      if (anyVisible) {
-        featLayer.classList.remove('hidden');
-      } else {
-        featLayer.classList.add('hidden');
-      }
+
+      document.getElementById('preview-weather').classList.toggle('hidden', !showWeather);
+      document.getElementById('preview-calendar').classList.toggle('hidden', !showDate);
+      document.getElementById('preview-steps').classList.toggle('hidden', !showSteps);
     }
 
     function updateClockLabels() {
