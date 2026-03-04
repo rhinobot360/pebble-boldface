@@ -377,13 +377,24 @@
     // Theme selection
     var THEME_WATCHFACES = {
       '0': 'watchface-tangerine.png',
-      '1': 'watchface-tangerine.png',
+      '1': 'watchface-blueberry.png',
       '2': 'watchface-tangerine.png',
       '3': 'watchface-tangerine.png',
       '4': 'watchface-tangerine.png',
       '5': 'watchface-tangerine.png',
       '6': 'watchface-tangerine.png',
       '7': 'watchface-tangerine.png'
+    };
+
+    var THEME_FEATURES = {
+      '0': 'watchface-tangerine-features.png',
+      '1': 'watchface-blueberry-features.png',
+      '2': 'watchface-tangerine-features.png',
+      '3': 'watchface-tangerine-features.png',
+      '4': 'watchface-tangerine-features.png',
+      '5': 'watchface-tangerine-features.png',
+      '6': 'watchface-tangerine-features.png',
+      '7': 'watchface-tangerine-features.png'
     };
 
     function selectTheme(el) {
@@ -394,6 +405,7 @@
       var val = el.getAttribute('data-value');
       document.getElementById('theme').value = val;
       document.getElementById('preview-watchface').src = THEME_WATCHFACES[val] || 'watchface-tangerine.png';
+      document.getElementById('preview-features').src = THEME_FEATURES[val] || 'watchface-tangerine-features.png';
     }
 
     // Temp label update
