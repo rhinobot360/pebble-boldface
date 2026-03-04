@@ -182,15 +182,20 @@
 
 
     /* Watch preview */
-    .watch-preview {
+    .watch-preview-wrapper {
       position: sticky;
-      top: 12px;
+      top: 0;
       z-index: 50;
+      background: #1a1a1a;
+      padding: 12px 0 12px 0;
+      margin: -20px -20px 16px -20px;
+    }
+
+    .watch-preview {
+      position: relative;
       width: 189px;
       height: 224px;
-      margin: 0 auto 16px auto;
-      background: #1a1a1a;
-      padding-bottom: 8px;
+      margin: 0 auto;
     }
 
     .watch-preview img {
@@ -255,12 +260,14 @@
   <h1>BoldFace</h1>
 
   <!-- Watch Preview -->
+  <div class="watch-preview-wrapper">
   <div class="watch-preview" id="watch-preview">
     <img src="watchface-tangerine.png" id="preview-watchface" alt="watchface">
     <img src="watchface-tangerine-calendar.png" id="preview-calendar" class="layer-features" alt="calendar">
     <img src="watchface-tangerine-weather.png" id="preview-weather" class="layer-features" alt="weather">
     <img src="watchface-tangerine-steps.png" id="preview-steps" class="layer-features" alt="steps">
     <img src="pebble-watch.png" id="preview-frame" alt="watch frame">
+  </div>
   </div>
 
   <!-- Theme -->
