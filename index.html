@@ -33,6 +33,7 @@
       margin-bottom: 2px;
       text-align: center;
       letter-spacing: 2px;
+      padding-bottom: 8px;
 
     }
 
@@ -188,7 +189,7 @@
       z-index: 50;
       background: #1a1a1a;
       padding: 12px 0 12px 0;
-      margin: -20px -20px 16px -20px;
+      margin: 0 -20px 16px -20px;
     }
 
     .watch-preview {
@@ -212,6 +213,15 @@
 
     .watch-preview .layer-features.hidden {
       opacity: 0;
+    }
+
+    .theme-name-bar {
+      text-align: center;
+      padding: 10px 20px;
+      margin: 0 -20px 16px -20px;
+      font-size: 15px;
+      color: #ffffff;
+      background: #111111;
     }
 
     .save-btn {
@@ -269,6 +279,8 @@
     <img src="pebble-watch.png" id="preview-frame" alt="watch frame">
   </div>
   </div>
+
+  <div class="theme-name-bar" id="theme-name-bar">Tangerine</div>
 
   <!-- Theme -->
   <div class="section">
@@ -385,6 +397,28 @@
     }
 
     // Theme selection
+    var THEME_COLORS = {
+      '0': '#ff5500',
+      '1': '#000055',
+      '2': '#005500',
+      '3': '#000000',
+      '4': '#555500',
+      '5': '#aa0000',
+      '6': '#aa00aa',
+      '7': '#ffff00'
+    };
+
+    var THEME_LABELS = {
+      '0': 'Tangerine',
+      '1': 'Blueberry',
+      '2': 'Lime',
+      '3': 'Licorice',
+      '4': 'Avocado',
+      '5': 'Cherry',
+      '6': 'Grape',
+      '7': 'Pink Lemonade'
+    };
+
     var THEME_WATCHFACES = {
       '0': 'watchface-tangerine.png',
       '1': 'watchface-blueberry.png',
@@ -440,6 +474,7 @@
       document.getElementById('preview-calendar').src = THEME_CALENDAR[val] || 'watchface-tangerine-calendar.png';
       document.getElementById('preview-weather').src = THEME_WEATHER[val] || 'watchface-tangerine-weather.png';
       document.getElementById('preview-steps').src = THEME_STEPS[val] || 'watchface-tangerine-steps.png';
+      document.getElementById('theme-name-bar').textContent = THEME_LABELS[val] || 'Tangerine';
     }
 
     // Temp label update
@@ -477,6 +512,9 @@
     updateTempLabels();
 
     updateFeaturesPreview();
+
+    // Set theme bar on load
+    document.getElementById('theme-name-bar').textContent = THEME_LABELS[savedTheme] || 'Tangerine';
 
     // Highlight saved theme
     var savedOption = document.querySelector('.theme-option[data-value="' + savedTheme + '"]');
