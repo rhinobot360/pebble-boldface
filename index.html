@@ -189,6 +189,8 @@
       width: 189px;
       height: 224px;
       margin: 0 auto 16px auto;
+      background: #1a1a1a;
+      padding-bottom: 8px;
     }
 
     .watch-preview img {
@@ -254,10 +256,10 @@
 
   <!-- Watch Preview -->
   <div class="watch-preview" id="watch-preview">
-    <img src="watchface-tangerine.png" id="preview-watchface" alt="watchface">
-    <img src="watchface-tangerine-calendar.png" id="preview-calendar" class="layer-features" alt="calendar">
-    <img src="watchface-tangerine-weather.png" id="preview-weather" class="layer-features" alt="weather">
-    <img src="watchface-tangerine-steps.png" id="preview-steps" class="layer-features" alt="steps">
+    <img src="watchface-licorice.png" id="preview-watchface" alt="watchface">
+    <img src="watchface-licorice-calendar.png" id="preview-calendar" class="layer-features" alt="calendar">
+    <img src="watchface-licorice-weather.png" id="preview-weather" class="layer-features" alt="weather">
+    <img src="watchface-licorice-steps.png" id="preview-steps" class="layer-features" alt="steps">
     <img src="pebble-watch.png" id="preview-frame" alt="watch frame">
   </div>
 
@@ -267,6 +269,10 @@
     <!-- ROYGBIV order: Cherry, Tangerine, Pink Lemonade, Lime, Avocado, Blueberry, Grape, Licorice -->
     <!-- Values map to main.c THEME_BG array index -->
     <div class="theme-grid">
+      <div class="theme-option" data-value="3" onclick="selectTheme(this)">
+        <div class="theme-circle" style="background:#000000;"></div>
+        <span>Licorice</span>
+      </div>
       <div class="theme-option" data-value="5" onclick="selectTheme(this)">
         <div class="theme-circle" style="background:#aa0000;"></div>
         <span>Cherry</span>
@@ -295,12 +301,8 @@
         <div class="theme-circle" style="background:#aa00aa;"></div>
         <span>Grape</span>
       </div>
-      <div class="theme-option" data-value="3" onclick="selectTheme(this)">
-        <div class="theme-circle" style="background:#000000;"></div>
-        <span>Licorice</span>
-      </div>
     </div>
-    <input type="hidden" id="theme" value="0">
+    <input type="hidden" id="theme" value="3">
   </div>
 
   <!-- Display toggles -->
@@ -457,7 +459,7 @@
     }
 
     // Load saved settings
-    var savedTheme = getParam('theme', '0');
+    var savedTheme = getParam('theme', '3');
     document.getElementById('show_weather').checked = getParam('show_weather', '1') === '1';
     document.getElementById('show_date').checked    = getParam('show_date', '1') === '1';
     document.getElementById('show_steps').checked   = getParam('show_steps', '1') === '1';
