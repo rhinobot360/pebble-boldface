@@ -165,6 +165,56 @@
       transform: translateX(20px);
     }
 
+    .unit-select-wrapper {
+      position: relative;
+      display: inline-block;
+    }
+
+    .unit-select-wrapper::after {
+      content: "";
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+      width: 0;
+      height: 0;
+      border-left: 5px solid transparent;
+      border-right: 5px solid transparent;
+      border-top: 6px solid #ffffff;
+    }
+
+    .unit-select {
+      background: #1a1a1a;
+      color: #ffffff;
+      border: 1px solid #555;
+      border-radius: 8px;
+      padding: 6px 28px 6px 10px;
+      font-size: 15px;
+      cursor: pointer;
+      outline: none;
+      -webkit-appearance: none;
+      appearance: none;
+      min-width: 60px;
+    }
+
+    .temp-unit-inline {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .temp-unit-subrow {
+      padding-left: 16px;
+      border-top: none;
+      transition: opacity 0.3s;
+    }
+
+    .temp-unit-subrow.disabled {
+      opacity: 0.3;
+      pointer-events: none;
+    }
+
     /* Temperature unit slider */
     .temp-unit-row {
       display: flex;
@@ -174,18 +224,7 @@
       padding: 4px 0;
     }
 
-    .temp-label {
-      font-size: 16px;
-      font-weight: 700;
-      color: rgba(255,255,255,0.35);
-      transition: color 0.2s;
-      width: 28px;
-      text-align: center;
-    }
 
-    .temp-label.active {
-      color: #ffffff;
-    }
 
 
     /* Watch preview */
@@ -336,9 +375,18 @@
     <div class="row">
       <label>Weather</label>
       <label class="toggle">
-        <input type="checkbox" id="show_weather" checked onchange="updateFeaturesPreview()">
+        <input type="checkbox" id="show_weather" checked onchange="updateFeaturesPreview(); updateTempUnit();">
         <span class="slider"></span>
       </label>
+    </div>
+    <div class="row temp-unit-subrow" id="temp-unit-subrow">
+      <label>Units</label>
+      <div class="unit-select-wrapper">
+      <select id="use_celsius" class="unit-select">
+        <option value="0">°F</option>
+        <option value="1">°C</option>
+      </select>
+      </div>
     </div>
     <div class="row">
       <label>Date</label>
@@ -356,18 +404,7 @@
     </div>
   </div>
 
-  <!-- Temperature unit -->
-  <div class="section">
-    <h2>Temperature Unit</h2>
-    <div class="temp-unit-row">
-      <span class="temp-label active" id="label_f">°F</span>
-      <label class="toggle">
-        <input type="checkbox" id="use_celsius" class="temp-toggle" onchange="updateTempLabels()">
-        <span class="slider"></span>
-      </label>
-      <span class="temp-label" id="label_c">°C</span>
-    </div>
-  </div>  </div>
+  </div>
 
   <div class="fade-overlay" id="fade-overlay"></div>
   <button class="save-btn" onclick="save()">Save Settings</button>
@@ -481,22 +518,23 @@
       document.getElementById('preview-steps').classList.toggle('hidden', !showSteps);
     }
 
-    function updateTempLabels() {
-      var isCelsius = document.getElementById('use_celsius').checked;
-      document.getElementById('label_f').classList.toggle('active', !isCelsius);
-      document.getElementById('label_c').classList.toggle('active', isCelsius);
+    function updateTempUnit() {
+      var showWeather = document.getElementById('show_weather').checked;
+      var subrow = document.getElementById('temp-unit-subrow');
+      subrow.classList.toggle('disabled', !showWeather);
     }
+
 
     // Load saved settings
     var savedTheme = getParam('theme', '0');
     document.getElementById('show_weather').checked = getParam('show_weather', '1') === '1';
     document.getElementById('show_date').checked    = getParam('show_date', '1') === '1';
     document.getElementById('show_steps').checked   = getParam('show_steps', '1') === '1';
-    document.getElementById('use_celsius').checked  = getParam('use_celsius', '0') === '1';
+    document.getElementById('use_celsius').value = getParam('use_celsius', '0');
     document.getElementById('theme').value = savedTheme;
-    updateTempLabels();
 
     updateFeaturesPreview();
+    updateTempUnit();
 
     // Set theme bar on load
     document.getElementById('theme-name-bar').textContent = THEME_LABELS[savedTheme] || 'Tangerine';
@@ -521,7 +559,7 @@
       var showWeather = document.getElementById('show_weather').checked;
       var showDate    = document.getElementById('show_date').checked;
       var showSteps   = document.getElementById('show_steps').checked;
-      var useCelsius  = document.getElementById('use_celsius').checked;
+      var useCelsius  = document.getElementById('use_celsius').value === '1';
 
       var settings = {
         'KEY_THEME':        themeIndex,
