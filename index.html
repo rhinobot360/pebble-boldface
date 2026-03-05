@@ -367,20 +367,7 @@
       </label>
       <span class="temp-label" id="label_c">°C</span>
     </div>
-  </div>
-
-  <!-- Clock Format -->
-  <div class="section">
-    <h2>Clock Format</h2>
-    <div class="temp-unit-row">
-      <span class="temp-label active" id="label_12">12h</span>
-      <label class="toggle">
-        <input type="checkbox" id="use_24h" class="temp-toggle" onchange="updateClockLabels()">
-        <span class="slider"></span>
-      </label>
-      <span class="temp-label" id="label_24">24h</span>
-    </div>
-  </div>
+  </div>  </div>
 
   <div class="fade-overlay" id="fade-overlay"></div>
   <button class="save-btn" onclick="save()">Save Settings</button>
@@ -494,12 +481,6 @@
       document.getElementById('preview-steps').classList.toggle('hidden', !showSteps);
     }
 
-    function updateClockLabels() {
-      var is24h = document.getElementById('use_24h').checked;
-      document.getElementById('label_12').classList.toggle('active', !is24h);
-      document.getElementById('label_24').classList.toggle('active', is24h);
-    }
-
     function updateTempLabels() {
       var isCelsius = document.getElementById('use_celsius').checked;
       document.getElementById('label_f').classList.toggle('active', !isCelsius);
@@ -512,8 +493,6 @@
     document.getElementById('show_date').checked    = getParam('show_date', '1') === '1';
     document.getElementById('show_steps').checked   = getParam('show_steps', '1') === '1';
     document.getElementById('use_celsius').checked  = getParam('use_celsius', '0') === '1';
-    document.getElementById('use_24h').checked       = getParam('use_24h', '0') === '1';
-    updateClockLabels();
     document.getElementById('theme').value = savedTheme;
     updateTempLabels();
 
@@ -528,8 +507,7 @@
       'show_weather': getParam('show_weather', '1') === '1' ? 'on' : 'off',
       'show_date':    getParam('show_date', '1') === '1' ? 'on' : 'off',
       'show_steps':   getParam('show_steps', '1') === '1' ? 'on' : 'off',
-      'temp_unit':    getParam('use_celsius', '0') === '1' ? 'celsius' : 'fahrenheit',
-      'clock_format': getParam('use_24h', '0') === '1' ? '24h' : '12h'
+      'temp_unit':    getParam('use_celsius', '0') === '1' ? 'celsius' : 'fahrenheit'
     });
 
     // Highlight saved theme
@@ -544,7 +522,6 @@
       var showDate    = document.getElementById('show_date').checked;
       var showSteps   = document.getElementById('show_steps').checked;
       var useCelsius  = document.getElementById('use_celsius').checked;
-      var use24h      = document.getElementById('use_24h').checked;
 
       var settings = {
         'KEY_THEME':        themeIndex,
@@ -552,7 +529,6 @@
         'KEY_SHOW_DATE':    showDate    ? 1 : 0,
         'KEY_SHOW_STEPS':   showSteps   ? 1 : 0,
         'KEY_USE_CELSIUS':  useCelsius  ? 1 : 0,
-        'KEY_USE_24H':      use24h      ? 1 : 0
       };
 
       gtag('event', 'save_settings', {
@@ -560,8 +536,7 @@
         'show_weather': showWeather ? 'on' : 'off',
         'show_date':    showDate    ? 'on' : 'off',
         'show_steps':   showSteps   ? 'on' : 'off',
-        'temp_unit':    useCelsius  ? 'celsius' : 'fahrenheit',
-        'clock_format': use24h      ? '24h' : '12h'
+        'temp_unit':    useCelsius  ? 'celsius' : 'fahrenheit'
       });
 
       var location = 'pebblejs://close#' + encodeURIComponent(JSON.stringify(settings));
