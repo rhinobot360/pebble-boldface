@@ -118,6 +118,44 @@
       color: #ffffff;
     }
 
+    /* Segmented control */
+    .segmented {
+      display: flex;
+      background: #1a1a1a;
+      border-radius: 8px;
+      padding: 3px;
+      gap: 2px;
+      width: 100%;
+    }
+
+    .segmented button {
+      flex: 1;
+      padding: 6px 10px;
+      border: none;
+      border-radius: 6px;
+      background: transparent;
+      color: rgba(255,255,255,0.4);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .segmented button.active {
+      background: #FF5500;
+      color: #ffffff;
+    }
+
+    .feature-rows {
+      transition: opacity 0.3s;
+    }
+
+    .feature-rows.disabled {
+      opacity: 0.3;
+      pointer-events: none;
+    }
+
     /* Toggle switch */
     .toggle {
       position: relative;
@@ -372,35 +410,44 @@
 
   <!-- Display toggles -->
   <div class="section">
-    <div class="row">
-      <label>Weather</label>
-      <label class="toggle">
-        <input type="checkbox" id="show_weather" checked onchange="updateFeaturesPreview(); updateTempUnit();">
-        <span class="slider"></span>
-      </label>
-    </div>
-    <div class="row temp-unit-subrow" id="temp-unit-subrow">
-      <label>Units</label>
-      <div class="unit-select-wrapper">
-      <select id="use_celsius" class="unit-select">
-        <option value="0">°F</option>
-        <option value="1">°C</option>
-      </select>
+    <div class="row" style="justify-content: center; border-bottom: 1px solid #333; padding-bottom: 14px;">
+      <div class="segmented" id="visibility-control">
+        <button class="active" onclick="setVisibility('on', this)">Always On</button>
+        <button onclick="setVisibility('shake', this)">On Shake</button>
+        <button onclick="setVisibility('off', this)">Off</button>
       </div>
     </div>
-    <div class="row">
-      <label>Date</label>
-      <label class="toggle">
-        <input type="checkbox" id="show_date" checked onchange="updateFeaturesPreview()">
-        <span class="slider"></span>
-      </label>
-    </div>
-    <div class="row">
-      <label>Steps</label>
-      <label class="toggle">
-        <input type="checkbox" id="show_steps" checked onchange="updateFeaturesPreview()">
-        <span class="slider"></span>
-      </label>
+    <div id="feature-rows" class="feature-rows">
+      <div class="row">
+        <label>Weather</label>
+        <label class="toggle">
+          <input type="checkbox" id="show_weather" checked onchange="updateFeaturesPreview(); updateTempUnit();">
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div class="row temp-unit-subrow" id="temp-unit-subrow">
+        <label>Units</label>
+        <div class="unit-select-wrapper">
+          <select id="use_celsius" class="unit-select">
+            <option value="0">°F</option>
+            <option value="1">°C</option>
+          </select>
+        </div>
+      </div>
+      <div class="row">
+        <label>Date</label>
+        <label class="toggle">
+          <input type="checkbox" id="show_date" checked onchange="updateFeaturesPreview()">
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div class="row">
+        <label>Steps</label>
+        <label class="toggle">
+          <input type="checkbox" id="show_steps" checked onchange="updateFeaturesPreview()">
+          <span class="slider"></span>
+        </label>
+      </div>
     </div>
   </div>
 
@@ -518,10 +565,19 @@
       document.getElementById('preview-steps').classList.toggle('hidden', !showSteps);
     }
 
+    function setVisibility(val, btn) {
+      document.querySelectorAll('#visibility-control button').forEach(function(b) {
+        b.classList.remove('active');
+      });
+      btn.classList.add('active');
+      document.getElementById('feature-rows').classList.toggle('disabled', val === 'off');
+    }
+
     function updateTempUnit() {
       var showWeather = document.getElementById('show_weather').checked;
       var subrow = document.getElementById('temp-unit-subrow');
-      subrow.classList.toggle('disabled', !showWeather);
+      subrow.style.opacity = showWeather ? '1' : '0.3';
+      subrow.style.pointerEvents = showWeather ? 'auto' : 'none';
     }
 
 
@@ -534,6 +590,16 @@
     document.getElementById('theme').value = savedTheme;
 
     updateFeaturesPreview();
+    var savedVisibility = getParam('visibility', 'on');
+    var visBtn = document.querySelector('#visibility-control button[data-value="' + savedVisibility + '"]');
+    document.querySelectorAll('#visibility-control button').forEach(function(b, i) {
+      if ((savedVisibility === 'on' && i === 0) || (savedVisibility === 'shake' && i === 1) || (savedVisibility === 'off' && i === 2)) {
+        b.classList.add('active');
+        if (savedVisibility === 'off') document.getElementById('feature-rows').classList.add('disabled');
+      } else {
+        b.classList.remove('active');
+      }
+    });
     updateTempUnit();
 
     // Set theme bar on load
@@ -561,8 +627,13 @@
       var showSteps   = document.getElementById('show_steps').checked;
       var useCelsius  = document.getElementById('use_celsius').value === '1';
 
+      var visButtons = document.querySelectorAll('#visibility-control button');
+      var visibility = 'on';
+      visButtons.forEach(function(b, i) { if (b.classList.contains('active')) visibility = ['on','shake','off'][i]; });
+
       var settings = {
         'KEY_THEME':        themeIndex,
+        'KEY_VISIBILITY':   visibility === 'on' ? 0 : visibility === 'shake' ? 1 : 2,
         'KEY_SHOW_WEATHER': showWeather ? 1 : 0,
         'KEY_SHOW_DATE':    showDate    ? 1 : 0,
         'KEY_SHOW_STEPS':   showSteps   ? 1 : 0,
@@ -571,6 +642,7 @@
 
       gtag('event', 'save_settings', {
         'theme':        THEME_NAMES[themeIndex],
+        'visibility':   visibility,
         'show_weather': showWeather ? 'on' : 'off',
         'show_date':    showDate    ? 'on' : 'off',
         'show_steps':   showSteps   ? 'on' : 'off',
