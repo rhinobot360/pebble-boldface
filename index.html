@@ -555,10 +555,20 @@
     }
 
     // Temp label update
+    function getVisibility() {
+      var active = document.querySelector('#visibility-control button.active');
+      var buttons = document.querySelectorAll('#visibility-control button');
+      for (var i = 0; i < buttons.length; i++) {
+        if (buttons[i].classList.contains('active')) return ['on','shake','off'][i];
+      }
+      return 'on';
+    }
+
     function updateFeaturesPreview() {
-      var showWeather = document.getElementById('show_weather').checked;
-      var showDate    = document.getElementById('show_date').checked;
-      var showSteps   = document.getElementById('show_steps').checked;
+      var isOff = getVisibility() === 'off';
+      var showWeather = !isOff && document.getElementById('show_weather').checked;
+      var showDate    = !isOff && document.getElementById('show_date').checked;
+      var showSteps   = !isOff && document.getElementById('show_steps').checked;
 
       document.getElementById('preview-weather').classList.toggle('hidden', !showWeather);
       document.getElementById('preview-calendar').classList.toggle('hidden', !showDate);
@@ -572,14 +582,7 @@
       btn.classList.add('active');
       document.getElementById('feature-rows').classList.toggle('disabled', val === 'off');
 
-      // Update watch preview based on visibility
-      if (val === 'off') {
-        document.getElementById('preview-weather').classList.add('hidden');
-        document.getElementById('preview-calendar').classList.add('hidden');
-        document.getElementById('preview-steps').classList.add('hidden');
-      } else {
-        updateFeaturesPreview();
-      }
+      updateFeaturesPreview();
     }
 
     function updateTempUnit() {
