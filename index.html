@@ -571,6 +571,15 @@
       });
       btn.classList.add('active');
       document.getElementById('feature-rows').classList.toggle('disabled', val === 'off');
+
+      // Update watch preview based on visibility
+      if (val === 'off') {
+        document.getElementById('preview-weather').classList.add('hidden');
+        document.getElementById('preview-calendar').classList.add('hidden');
+        document.getElementById('preview-steps').classList.add('hidden');
+      } else {
+        updateFeaturesPreview();
+      }
     }
 
     function updateTempUnit() {
