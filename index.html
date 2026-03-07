@@ -347,6 +347,21 @@
     .save-btn:active {
       background: #cc4400;
     }
+
+    @keyframes watchShake {
+      0%   { transform: translateX(0px) rotate(0deg);   filter: blur(0px); }
+      10%  { transform: translateX(-6px) rotate(-3deg); filter: blur(1.5px); }
+      25%  { transform: translateX(7px) rotate(2.5deg); filter: blur(2px); }
+      40%  { transform: translateX(-5px) rotate(-2deg); filter: blur(1.5px); }
+      55%  { transform: translateX(6px) rotate(2deg);   filter: blur(1.8px); }
+      70%  { transform: translateX(-4px) rotate(-1.5deg); filter: blur(1px); }
+      85%  { transform: translateX(3px) rotate(1deg);   filter: blur(0.5px); }
+      100% { transform: translateX(0px) rotate(0deg);   filter: blur(0px); }
+    }
+
+    .watch-shaking {
+      animation: watchShake 0.75s ease-in-out forwards;
+    }
   </style>
 </head>
 <body>
