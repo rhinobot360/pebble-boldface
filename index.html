@@ -596,8 +596,44 @@
       });
       btn.classList.add('active');
       document.getElementById('feature-rows').classList.toggle('disabled', val === 'off');
-
       updateFeaturesPreview();
+
+      if (val === 'shake') {
+        var watch    = document.getElementById('watch-preview');
+        var weather  = document.getElementById('preview-weather');
+        var calendar = document.getElementById('preview-calendar');
+        var steps    = document.getElementById('preview-steps');
+
+        // Hide features first
+        weather.classList.add('hidden');
+        calendar.classList.add('hidden');
+        steps.classList.add('hidden');
+
+        // Short pause, then shake
+        setTimeout(function() {
+          watch.classList.add('watch-shaking');
+
+          // Show features shortly into the shake
+          setTimeout(function() {
+            weather.classList.remove('hidden');
+            calendar.classList.remove('hidden');
+            steps.classList.remove('hidden');
+          }, 300);
+
+          // Remove shake class after animation completes
+          setTimeout(function() {
+            watch.classList.remove('watch-shaking');
+          }, 750);
+
+          // Hide features after 6 seconds
+          setTimeout(function() {
+            weather.classList.add('hidden');
+            calendar.classList.add('hidden');
+            steps.classList.add('hidden');
+          }, 6300);
+
+        }, 400);
+      }
     }
 
     function updateTempUnit() {
