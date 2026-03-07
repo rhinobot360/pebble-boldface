@@ -609,6 +609,7 @@
       clearShakeTimers();
 
       document.getElementById('feature-rows').classList.toggle('disabled', val === 'off');
+      document.getElementById('use_celsius').disabled = (val === 'off');
       updateFeaturesPreview();
 
       if (val === 'shake') {
@@ -671,7 +672,7 @@
     document.querySelectorAll('#visibility-control button').forEach(function(b, i) {
       if ((savedVisibility === 'on' && i === 0) || (savedVisibility === 'shake' && i === 1) || (savedVisibility === 'off' && i === 2)) {
         b.classList.add('active');
-        if (savedVisibility === 'off') document.getElementById('feature-rows').classList.add('disabled');
+        if (savedVisibility === 'off') { document.getElementById('feature-rows').classList.add('disabled'); document.getElementById('use_celsius').disabled = true; }
       } else {
         b.classList.remove('active');
       }
