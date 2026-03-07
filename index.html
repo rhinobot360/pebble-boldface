@@ -588,9 +588,31 @@
       document.getElementById('preview-weather').classList.toggle('hidden', !showWeather);
       document.getElementById('preview-calendar').classList.toggle('hidden', !showDate);
       document.getElementById('preview-steps').classList.toggle('hidden', !showSteps);
+
+      // Only auto-switch when user is toggling individual features, not manual visibility clicks
+      if (!_manualVisibility) {
+        var allOff = !document.getElementById('show_weather').checked &&
+                     !document.getElementById('show_date').checked &&
+                     !document.getElementById('show_steps').checked;
+
+        if (allOff && getVisibility() !== 'off') {
+          var buttons = document.querySelectorAll('#visibility-control button');
+          buttons.forEach(function(b) { b.classList.remove('active'); });
+          buttons[2].classList.add('active'); // Off button
+          // Don't disable feature-rows — user can still toggle back
+        } else if (!allOff && getVisibility() === 'off') {
+          // If user turns one back on while master is Off, switch to Always On
+          var buttons = document.querySelectorAll('#visibility-control button');
+          buttons.forEach(function(b) { b.classList.remove('active'); });
+          buttons[0].classList.add('active'); // Always On button
+          document.getElementById('feature-rows').classList.remove('disabled');
+          document.getElementById('use_celsius').disabled = false;
+        }
+      }
     }
 
     var _shakeTimers = [];
+    var _manualVisibility = false; // true when user clicked a visibility button directly
 
     function clearShakeTimers() {
       _shakeTimers.forEach(function(t) { clearTimeout(t); });
@@ -610,7 +632,9 @@
 
       document.getElementById('feature-rows').classList.toggle('disabled', val === 'off');
       document.getElementById('use_celsius').disabled = (val === 'off');
+      _manualVisibility = true;
       updateFeaturesPreview();
+      _manualVisibility = false;
 
       if (val === 'shake') {
         var watch    = document.getElementById('watch-preview');
