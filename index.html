@@ -420,7 +420,7 @@
     <div class="row" style="justify-content: center; border-bottom: 1px solid #333; padding-bottom: 14px;">
       <div class="segmented" id="visibility-control">
         <button class="active" onclick="setVisibility('on', this)">Always On</button>
-        <button onclick="setVisibility('shake', this)">On Shake</button>
+        <button onclick="setVisibility('shake', this)">Shake to Show</button>
         <button onclick="setVisibility('off', this)">Off</button>
       </div>
     </div>
@@ -625,7 +625,7 @@
 
       document.getElementById('feature-rows').classList.toggle('disabled', val === 'off');
       document.getElementById('use_celsius').disabled = (val === 'off');
-      // If switching to Always On or On Shake and all features are off, turn them all on
+      // If switching to Always On or Shake to Show and all features are off, turn them all on
       if (val !== 'off') {
         var allOff = !document.getElementById('show_weather').checked &&
                      !document.getElementById('show_date').checked &&
