@@ -632,6 +632,19 @@
 
       document.getElementById('feature-rows').classList.toggle('disabled', val === 'off');
       document.getElementById('use_celsius').disabled = (val === 'off');
+      // If switching to Always On or On Shake and all features are off, turn them all on
+      if (val !== 'off') {
+        var allOff = !document.getElementById('show_weather').checked &&
+                     !document.getElementById('show_date').checked &&
+                     !document.getElementById('show_steps').checked;
+        if (allOff) {
+          document.getElementById('show_weather').checked = true;
+          document.getElementById('show_date').checked    = true;
+          document.getElementById('show_steps').checked   = true;
+          updateTempUnit();
+        }
+      }
+
       _manualVisibility = true;
       updateFeaturesPreview();
       _manualVisibility = false;
