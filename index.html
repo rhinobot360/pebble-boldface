@@ -590,11 +590,24 @@
       document.getElementById('preview-steps').classList.toggle('hidden', !showSteps);
     }
 
+    var _shakeTimers = [];
+
+    function clearShakeTimers() {
+      _shakeTimers.forEach(function(t) { clearTimeout(t); });
+      _shakeTimers = [];
+      var watch = document.getElementById('watch-preview');
+      watch.classList.remove('watch-shaking');
+    }
+
     function setVisibility(val, btn) {
       document.querySelectorAll('#visibility-control button').forEach(function(b) {
         b.classList.remove('active');
       });
       btn.classList.add('active');
+
+      // Cancel any in-progress shake animation and timers
+      clearShakeTimers();
+
       document.getElementById('feature-rows').classList.toggle('disabled', val === 'off');
       updateFeaturesPreview();
 
@@ -610,29 +623,29 @@
         steps.classList.add('hidden');
 
         // Short pause, then shake
-        setTimeout(function() {
+        _shakeTimers.push(setTimeout(function() {
           watch.classList.add('watch-shaking');
 
           // Show features shortly into the shake
-          setTimeout(function() {
+          _shakeTimers.push(setTimeout(function() {
             weather.classList.remove('hidden');
             calendar.classList.remove('hidden');
             steps.classList.remove('hidden');
-          }, 300);
+          }, 300));
 
           // Remove shake class after animation completes
-          setTimeout(function() {
+          _shakeTimers.push(setTimeout(function() {
             watch.classList.remove('watch-shaking');
-          }, 750);
+          }, 750));
 
           // Hide features after 6 seconds
-          setTimeout(function() {
+          _shakeTimers.push(setTimeout(function() {
             weather.classList.add('hidden');
             calendar.classList.add('hidden');
             steps.classList.add('hidden');
-          }, 6300);
+          }, 6300));
 
-        }, 400);
+        }, 400));
       }
     }
 
