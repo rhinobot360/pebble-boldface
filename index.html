@@ -4,14 +4,6 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>BoldFace Settings</title>
-    <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-148S6H6J10"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag("js", new Date());
-    gtag("config", "G-148S6H6J10");
-  </script>
   <link href="https://fonts.googleapis.com/css2?family=Gasoek+One&display=swap" rel="stylesheet">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -719,20 +711,10 @@
     // Set theme bar on load
     document.getElementById('theme-name-bar').textContent = THEME_LABELS[savedTheme] || 'Tangerine';
 
-    // Track page open with current saved settings
-    gtag('event', 'page_open', {
-      'theme':        THEME_LABELS[savedTheme] || 'Tangerine',
-      'show_weather': getParam('show_weather', '1') === '1' ? 'on' : 'off',
-      'show_date':    getParam('show_date', '1') === '1' ? 'on' : 'off',
-      'show_steps':   getParam('show_steps', '1') === '1' ? 'on' : 'off',
-      'temp_unit':    getParam('use_celsius', '0') === '1' ? 'celsius' : 'fahrenheit'
-    });
-
     // Highlight saved theme
     var savedOption = document.querySelector('.theme-option[data-value="' + savedTheme + '"]');
     if (savedOption) savedOption.classList.add('selected');
 
-    var THEME_NAMES = ['Tangerine','Blueberry','Lime','Licorice','Avocado','Cherry','Grape','Pink Lemonade'];
 
     function save() {
       var themeIndex  = parseInt(document.getElementById('theme').value);
@@ -753,15 +735,6 @@
         'KEY_SHOW_STEPS':   showSteps   ? 1 : 0,
         'KEY_USE_CELSIUS':  useCelsius  ? 1 : 0,
       };
-
-      gtag('event', 'save_settings', {
-        'theme':        THEME_NAMES[themeIndex],
-        'visibility':   visibility,
-        'show_weather': showWeather ? 'on' : 'off',
-        'show_date':    showDate    ? 'on' : 'off',
-        'show_steps':   showSteps   ? 'on' : 'off',
-        'temp_unit':    useCelsius  ? 'celsius' : 'fahrenheit'
-      });
 
       var location = 'pebblejs://close#' + encodeURIComponent(JSON.stringify(settings));
       document.location = location;
