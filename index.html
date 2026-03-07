@@ -664,11 +664,11 @@
         _shakeTimers.push(setTimeout(function() {
           watch.classList.add('watch-shaking');
 
-          // Show features shortly into the shake
+          // Show features shortly into the shake (respect individual toggle states)
           _shakeTimers.push(setTimeout(function() {
-            weather.classList.remove('hidden');
-            calendar.classList.remove('hidden');
-            steps.classList.remove('hidden');
+            if (document.getElementById('show_weather').checked) weather.classList.remove('hidden');
+            if (document.getElementById('show_date').checked)    calendar.classList.remove('hidden');
+            if (document.getElementById('show_steps').checked)   steps.classList.remove('hidden');
           }, 300));
 
           // Remove shake class after animation completes
