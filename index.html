@@ -1,160 +1,746 @@
-// Phone-side code: settings + weather from Open-Meteo
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>BoldFace Settings</title>
+  <link href="https://fonts.googleapis.com/css2?family=Gasoek+One&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
-var SETTINGS_URL  = 'https://rhinobot360.github.io/pebble-boldface/';
-var ANALYTICS_URL = 'https://script.google.com/macros/s/AKfycbzUpTpx8q_fy3Ppg780g-RjekdlS0imaF5CuKJ_bFQQUrei7eSkZdGl0pXm-Dt7Z2TxTg/exec';
-var APP_VERSION   = '1.0';
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #1a1a1a;
+      color: #ffffff;
+      padding: 20px 20px 80px 20px;
+      max-width: 480px;
+      margin: 0 auto;
+    }
 
-var xhrRequest = function(url, type, callback) {
-  var xhr = new XMLHttpRequest();
-  xhr.onload = function() {
-    callback(this.responseText);
-  };
-  xhr.open(type, url);
-  xhr.send();
-};
+    .header-bar {
+      background: #111111;
+      margin: -20px -20px 0 -20px;
+      padding: 16px 20px 8px 20px;
+    }
 
-function pingUsage() {
-  var now       = Date.now();
-  var lastPing  = parseInt(localStorage.getItem('last_ping') || '0');
-  var oneDay    = 24 * 60 * 60 * 1000;
+    h1 {
+      font-family: 'Gasoek One', sans-serif;
+      font-size: 52px;
+      font-weight: 700;
+      color: #FF5500;
+      margin-bottom: 2px;
+      text-align: center;
+      letter-spacing: 2px;
+      padding-bottom: 8px;
 
-  if (now - lastPing < oneDay) return; // Already pinged today
+    }
 
-  var THEME_LABELS = ['Tangerine','Blueberry','Lime','Licorice','Avocado','Cherry','Grape','Pink Lemonade'];
-  var VIS_LABELS   = ['always_on','shake_to_show','off'];
+    .section {
+      background: #2a2a2a;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
 
-  var themeIndex  = parseInt(localStorage.getItem('theme') || '0');
-  var visIndex    = parseInt(localStorage.getItem('visibility') || '0');
+    .section h2 {
+      font-size: 11px;
+      font-weight: 600;
+      color: #FF5500;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin-bottom: 12px;
+    }
 
-  var params = [
-    'theme='      + encodeURIComponent(THEME_LABELS[themeIndex] || 'Tangerine'),
-    'weather='    + (localStorage.getItem('show_weather') === '0' ? 'off' : 'on'),
-    'date='       + (localStorage.getItem('show_date')    === '0' ? 'off' : 'on'),
-    'steps='      + (localStorage.getItem('show_steps')   === '0' ? 'off' : 'on'),
-    'visibility=' + encodeURIComponent(VIS_LABELS[visIndex] || 'always_on'),
-    'device_id='  + encodeURIComponent(localStorage.getItem('device_id') || 'unknown'),
-    'version='    + APP_VERSION
-  ].join('&');
+    .row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid #333;
+    }
 
-  xhrRequest(ANALYTICS_URL + '?' + params, 'GET', function(response) {
-    console.log('Usage ping sent: ' + response);
-    localStorage.setItem('last_ping', now.toString());
-  });
-}
+    .row:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
 
-function locationSuccess(pos) {
-  var lat = pos.coords.latitude;
-  var lon = pos.coords.longitude;
-  var useCelsius = localStorage.getItem('use_celsius') === '1';
+    .row:first-of-type {
+      padding-top: 0;
+    }
 
-  var url = 'https://api.open-meteo.com/v1/forecast' +
-    '?latitude=' + lat +
-    '&longitude=' + lon +
-    '&current=temperature_2m,weathercode' +
-    '&temperature_unit=' + (useCelsius ? 'celsius' : 'fahrenheit');
+    label {
+      font-size: 15px;
+      color: #ffffff;
+    }
 
-  xhrRequest(url, 'GET', function(responseText) {
-    var json = JSON.parse(responseText);
-    var temp = Math.round(json.current.temperature_2m);
-    var code = json.current.weathercode;
+    /* Theme grid */
+    .theme-grid {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 8px;
+      padding: 4px 0;
+    }
 
-    var icon = 0;
-    if (code === 0)       icon = 0; // Clear
-    else if (code <= 2)   icon = 1; // Partly cloudy
-    else if (code === 3)  icon = 2; // Cloudy
-    else if (code <= 49)  icon = 6; // Fog
-    else if (code <= 67)  icon = 3; // Rain
-    else if (code <= 77)  icon = 5; // Snow
-    else if (code <= 82)  icon = 3; // Rain showers
-    else if (code <= 99)  icon = 4; // Thunder
+    .theme-option {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+    }
 
-    Pebble.sendAppMessage({
-      'KEY_TEMPERATURE': temp,
-      'KEY_WEATHER_ICON': icon,
-      'KEY_USE_CELSIUS': useCelsius ? 1 : 0
-    }, function() {
-      console.log('Weather sent to watch');
-    }, function(e) {
-      console.log('Weather send failed: ' + JSON.stringify(e));
+    .theme-circle {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 3px solid transparent;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+
+    .theme-option.selected .theme-circle {
+      border-color: #ffffff;
+      transform: scale(1.1);
+    }
+
+    .theme-option span {
+      display: none;
+    }
+
+    .theme-option.selected span {
+      color: #ffffff;
+    }
+
+    /* Segmented control */
+    .segmented {
+      display: flex;
+      background: #1a1a1a;
+      border-radius: 8px;
+      padding: 3px;
+      gap: 2px;
+      width: 100%;
+    }
+
+    .segmented button {
+      flex: 1;
+      padding: 6px 10px;
+      border: none;
+      border-radius: 6px;
+      background: transparent;
+      color: rgba(255,255,255,0.4);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .segmented button.active {
+      background: #FF5500;
+      color: #ffffff;
+    }
+
+    .feature-rows {
+      transition: opacity 0.3s;
+    }
+
+    .feature-rows.disabled {
+      opacity: 0.3;
+      pointer-events: none;
+    }
+
+    /* Toggle switch */
+    .toggle {
+      position: relative;
+      width: 48px;
+      height: 28px;
+      flex-shrink: 0;
+    }
+
+    .toggle input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: #444;
+      border-radius: 28px;
+      transition: 0.3s;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 20px;
+      width: 20px;
+      left: 4px;
+      bottom: 4px;
+      background: white;
+      border-radius: 50%;
+      transition: 0.3s;
+    }
+
+    .temp-toggle + .slider {
+      background: #FF5500;
+    }
+
+    input:checked + .slider {
+      background: #FF5500;
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(20px);
+    }
+
+    .unit-select-wrapper {
+      position: relative;
+      display: inline-block;
+    }
+
+    .unit-select-wrapper::after {
+      content: "";
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+      width: 0;
+      height: 0;
+      border-left: 5px solid transparent;
+      border-right: 5px solid transparent;
+      border-top: 6px solid #ffffff;
+    }
+
+    .unit-select {
+      background: #1a1a1a;
+      color: #ffffff;
+      border: 1px solid #555;
+      border-radius: 8px;
+      padding: 6px 28px 6px 10px;
+      font-size: 15px;
+      cursor: pointer;
+      outline: none;
+      -webkit-appearance: none;
+      appearance: none;
+      min-width: 60px;
+    }
+
+    .temp-unit-inline {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .temp-unit-subrow {
+      padding-left: 16px;
+      border-top: none;
+      transition: opacity 0.3s;
+    }
+
+    .temp-unit-subrow.disabled {
+      opacity: 0.3;
+      pointer-events: none;
+    }
+
+    /* Temperature unit slider */
+    .temp-unit-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 4px 0;
+    }
+
+
+
+
+    /* Watch preview */
+    .watch-preview-wrapper {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: radial-gradient(ellipse at center, #606060 0%, #1a1a1a 70%);
+      padding: 0;
+      margin: 0 -20px 16px -20px;
+    }
+
+    .watch-preview {
+      position: relative;
+      width: 189px;
+      height: 224px;
+      margin: 0 auto;
+      display: block;
+    }
+
+    .watch-preview img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    .watch-preview .layer-features {
+      transition: opacity 0.3s;
+    }
+
+    .watch-preview .layer-features.hidden {
+      opacity: 0;
+    }
+
+    .theme-name-bar {
+      text-align: center;
+      padding: 10px 20px;
+      margin: 0;
+      font-size: 15px;
+      color: #ffffff;
+      background: #111111;
+    }
+
+    .save-btn {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      width: 100%;
+      padding: 16px;
+      background: #FF5500;
+      color: white;
+      border: none;
+      border-radius: 0;
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.2s;
+      z-index: 100;
+    }
+
+    .fade-overlay {
+      position: fixed;
+      bottom: 52px;
+      left: 0;
+      right: 0;
+      height: 72px;
+      background: linear-gradient(to bottom, transparent, #1a1a1a);
+      pointer-events: none;
+      z-index: 99;
+      transition: opacity 0.3s;
+    }
+
+    .fade-overlay.hidden {
+      opacity: 0;
+    }
+
+    .save-btn:active {
+      background: #cc4400;
+    }
+
+    @keyframes watchShake {
+      0%   { transform: translateX(0px) rotate(0deg);   filter: blur(0px); }
+      10%  { transform: translateX(-6px) rotate(-3deg); filter: blur(1.5px); }
+      25%  { transform: translateX(7px) rotate(2.5deg); filter: blur(2px); }
+      40%  { transform: translateX(-5px) rotate(-2deg); filter: blur(1.5px); }
+      55%  { transform: translateX(6px) rotate(2deg);   filter: blur(1.8px); }
+      70%  { transform: translateX(-4px) rotate(-1.5deg); filter: blur(1px); }
+      85%  { transform: translateX(3px) rotate(1deg);   filter: blur(0.5px); }
+      100% { transform: translateX(0px) rotate(0deg);   filter: blur(0px); }
+    }
+
+    .watch-shaking {
+      animation: watchShake 0.75s ease-in-out forwards;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header-bar">
+    <h1>BoldFace</h1>
+  </div>
+
+  <!-- Watch Preview -->
+  <div class="watch-preview-wrapper">
+  <div class="watch-preview" id="watch-preview">
+    <img src="watchface-tangerine.png" id="preview-watchface" alt="watchface">
+    <img src="watchface-tangerine-calendar.png" id="preview-calendar" class="layer-features" alt="calendar">
+    <img src="watchface-tangerine-weather.png" id="preview-weather" class="layer-features" alt="weather">
+    <img src="watchface-tangerine-steps.png" id="preview-steps" class="layer-features" alt="steps">
+    <img src="pebble-watch.png" id="preview-frame" alt="watch frame">
+  </div>
+  <div class="theme-name-bar" id="theme-name-bar">Tangerine</div>
+  </div>
+
+  <!-- Theme -->
+  <div class="section">
+    <!-- ROYGBIV order: Licorice, Cherry, Tangerine, Pink Lemonade, Avocado, Lime, Blueberry, Grape -->
+    <!-- Values map to main.c THEME_BG array index -->
+    <div class="theme-grid">
+      <div class="theme-option" data-value="5" onclick="selectTheme(this)">
+        <div class="theme-circle" style="background:#aa0000;"></div>
+        <span>Cherry</span>
+      </div>
+      <div class="theme-option" data-value="0" onclick="selectTheme(this)">
+        <div class="theme-circle" style="background:#ff5500;"></div>
+        <span>Tangerine</span>
+      </div>
+      <div class="theme-option" data-value="7" onclick="selectTheme(this)">
+        <div class="theme-circle" style="background:#ffff00;"></div>
+        <span>Pink Lemonade</span>
+      </div>
+      <div class="theme-option" data-value="4" onclick="selectTheme(this)">
+        <div class="theme-circle" style="background:#555500;"></div>
+        <span>Avocado</span>
+      </div>
+      <div class="theme-option" data-value="2" onclick="selectTheme(this)">
+        <div class="theme-circle" style="background:#005500;"></div>
+        <span>Lime</span>
+      </div>
+      <div class="theme-option" data-value="1" onclick="selectTheme(this)">
+        <div class="theme-circle" style="background:#000055;"></div>
+        <span>Blueberry</span>
+      </div>
+      <div class="theme-option" data-value="6" onclick="selectTheme(this)">
+        <div class="theme-circle" style="background:#aa00aa;"></div>
+        <span>Grape</span>
+      </div>
+      <div class="theme-option" data-value="3" onclick="selectTheme(this)">
+        <div class="theme-circle" style="background:#000000;"></div>
+        <span>Licorice</span>
+      </div>
+    </div>
+    <input type="hidden" id="theme" value="0">
+  </div>
+
+  <!-- Display toggles -->
+  <div class="section">
+    <div class="row" style="justify-content: center; border-bottom: 1px solid #333; padding-bottom: 14px;">
+      <div class="segmented" id="visibility-control">
+        <button class="active" onclick="setVisibility('on', this)">Always On</button>
+        <button onclick="setVisibility('shake', this)">Shake to Show</button>
+        <button onclick="setVisibility('off', this)">Off</button>
+      </div>
+    </div>
+    <div id="feature-rows" class="feature-rows">
+      <div class="row">
+        <label>Weather</label>
+        <label class="toggle">
+          <input type="checkbox" id="show_weather" checked onchange="updateFeaturesPreview(); updateTempUnit();">
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div class="row temp-unit-subrow" id="temp-unit-subrow">
+        <label>Units</label>
+        <div class="unit-select-wrapper">
+          <select id="use_celsius" class="unit-select">
+            <option value="0">°F</option>
+            <option value="1">°C</option>
+          </select>
+        </div>
+      </div>
+      <div class="row">
+        <label>Date</label>
+        <label class="toggle">
+          <input type="checkbox" id="show_date" checked onchange="updateFeaturesPreview()">
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div class="row">
+        <label>Steps</label>
+        <label class="toggle">
+          <input type="checkbox" id="show_steps" checked onchange="updateFeaturesPreview()">
+          <span class="slider"></span>
+        </label>
+      </div>
+    </div>
+  </div>
+
+  </div>
+
+  <div class="fade-overlay" id="fade-overlay"></div>
+  <button class="save-btn" onclick="save()">Save Settings</button>
+  <p style="text-align:center; margin: 16px 0 32px; font-size: 12px;"><a href="privacy.html" style="color: #555555; text-decoration: none;">Privacy Policy</a></p>
+
+  <script>
+    window.addEventListener('scroll', function() {
+      var scrollBottom = window.innerHeight + window.scrollY;
+      var pageHeight = document.documentElement.scrollHeight;
+      var overlay = document.getElementById('fade-overlay');
+      if (scrollBottom >= pageHeight - 10) {
+        overlay.classList.add('hidden');
+      } else {
+        overlay.classList.remove('hidden');
+      }
     });
-  });
-}
 
-function locationError(err) {
-  console.log('Location error: ' + err);
-}
+    function getParam(key, fallback) {
+      var params = new URLSearchParams(window.location.search);
+      return params.has(key) ? params.get(key) : fallback;
+    }
 
-function getWeather() {
-  navigator.geolocation.getCurrentPosition(locationSuccess, locationError, {
-    timeout: 15000,
-    maximumAge: 60000
-  });
-}
+    // Theme selection
+    var THEME_COLORS = {
+      '0': '#ff5500',
+      '1': '#000055',
+      '2': '#005500',
+      '3': '#000000',
+      '4': '#555500',
+      '5': '#aa0000',
+      '6': '#aa00aa',
+      '7': '#ffff00'
+    };
 
-// Open settings page
-Pebble.addEventListener('showConfiguration', function() {
-  var theme        = localStorage.getItem('theme') || '0';
-  var show_weather = localStorage.getItem('show_weather') || '1';
-  var show_date    = localStorage.getItem('show_date') || '1';
-  var show_steps   = localStorage.getItem('show_steps') || '1';
-  var use_celsius  = localStorage.getItem('use_celsius') || '0';
+    var THEME_LABELS = {
+      '0': 'Tangerine',
+      '1': 'Blueberry',
+      '2': 'Lime',
+      '3': 'Licorice',
+      '4': 'Avocado',
+      '5': 'Cherry',
+      '6': 'Grape',
+      '7': 'Pink Lemonade'
+    };
 
-  var url = SETTINGS_URL +
-    '?theme=' + theme +
-    '&show_weather=' + show_weather +
-    '&show_date=' + show_date +
-    '&show_steps=' + show_steps +
-    '&use_celsius=' + use_celsius +
+    var THEME_WATCHFACES = {
+      '0': 'watchface-tangerine.png',
+      '1': 'watchface-blueberry.png',
+      '2': 'watchface-lime.png',
+      '3': 'watchface-licorice.png',
+      '4': 'watchface-avocado.png',
+      '5': 'watchface-cherry.png',
+      '6': 'watchface-grape.png',
+      '7': 'watchface-pink-lemonade.png'
+    };
+
+    var THEME_CALENDAR = {
+      '0': 'watchface-tangerine-calendar.png',
+      '1': 'watchface-blueberry-calendar.png',
+      '2': 'watchface-lime-calendar.png',
+      '3': 'watchface-licorice-calendar.png',
+      '4': 'watchface-avocado-calendar.png',
+      '5': 'watchface-cherry-calendar.png',
+      '6': 'watchface-grape-calendar.png',
+      '7': 'watchface-pink-lemonade-calendar.png'
+    };
+
+    var THEME_WEATHER = {
+      '0': 'watchface-tangerine-weather.png',
+      '1': 'watchface-blueberry-weather.png',
+      '2': 'watchface-lime-weather.png',
+      '3': 'watchface-licorice-weather.png',
+      '4': 'watchface-avocado-weather.png',
+      '5': 'watchface-cherry-weather.png',
+      '6': 'watchface-grape-weather.png',
+      '7': 'watchface-pink-lemonade-weather.png'
+    };
+
+    var THEME_STEPS = {
+      '0': 'watchface-tangerine-steps.png',
+      '1': 'watchface-blueberry-steps.png',
+      '2': 'watchface-lime-steps.png',
+      '3': 'watchface-licorice-steps.png',
+      '4': 'watchface-avocado-steps.png',
+      '5': 'watchface-cherry-steps.png',
+      '6': 'watchface-grape-steps.png',
+      '7': 'watchface-pink-lemonade-steps.png'
+    };
+
+    function selectTheme(el) {
+      document.querySelectorAll('.theme-option').forEach(function(o) {
+        o.classList.remove('selected');
+      });
+      el.classList.add('selected');
+      var val = el.getAttribute('data-value');
+      document.getElementById('theme').value = val;
+      document.getElementById('preview-watchface').src = THEME_WATCHFACES[val] || 'watchface-tangerine.png';
+      document.getElementById('preview-calendar').src = THEME_CALENDAR[val] || 'watchface-tangerine-calendar.png';
+      document.getElementById('preview-weather').src = THEME_WEATHER[val] || 'watchface-tangerine-weather.png';
+      document.getElementById('preview-steps').src = THEME_STEPS[val] || 'watchface-tangerine-steps.png';
+      document.getElementById('theme-name-bar').textContent = THEME_LABELS[val] || 'Tangerine';
+    }
+
+    // Temp label update
+    function getVisibility() {
+      var active = document.querySelector('#visibility-control button.active');
+      var buttons = document.querySelectorAll('#visibility-control button');
+      for (var i = 0; i < buttons.length; i++) {
+        if (buttons[i].classList.contains('active')) return ['on','shake','off'][i];
+      }
+      return 'on';
+    }
+
+    function updateFeaturesPreview() {
+      var isOff = getVisibility() === 'off';
+      var showWeather = !isOff && document.getElementById('show_weather').checked;
+      var showDate    = !isOff && document.getElementById('show_date').checked;
+      var showSteps   = !isOff && document.getElementById('show_steps').checked;
+
+      document.getElementById('preview-weather').classList.toggle('hidden', !showWeather);
+      document.getElementById('preview-calendar').classList.toggle('hidden', !showDate);
+      document.getElementById('preview-steps').classList.toggle('hidden', !showSteps);
+
+      // Only auto-switch when user is toggling individual features, not manual visibility clicks
+      if (!_manualVisibility) {
+        var allOff = !document.getElementById('show_weather').checked &&
+                     !document.getElementById('show_date').checked &&
+                     !document.getElementById('show_steps').checked;
+
+        if (allOff && getVisibility() !== 'off') {
+          var buttons = document.querySelectorAll('#visibility-control button');
+          buttons.forEach(function(b) { b.classList.remove('active'); });
+          buttons[2].classList.add('active'); // Off button
+          // Don't disable feature-rows — user can still toggle back
+        } else if (!allOff && getVisibility() === 'off') {
+          // If user turns one back on while master is Off, switch to Always On
+          var buttons = document.querySelectorAll('#visibility-control button');
+          buttons.forEach(function(b) { b.classList.remove('active'); });
+          buttons[0].classList.add('active'); // Always On button
+          document.getElementById('feature-rows').classList.remove('disabled');
+          document.getElementById('use_celsius').disabled = false;
+        }
+      }
+    }
+
+    var _shakeTimers = [];
+    var _manualVisibility = false; // true when user clicked a visibility button directly
+
+    function clearShakeTimers() {
+      _shakeTimers.forEach(function(t) { clearTimeout(t); });
+      _shakeTimers = [];
+      var watch = document.getElementById('watch-preview');
+      watch.classList.remove('watch-shaking');
+    }
+
+    function setVisibility(val, btn) {
+      document.querySelectorAll('#visibility-control button').forEach(function(b) {
+        b.classList.remove('active');
+      });
+      btn.classList.add('active');
+
+      // Cancel any in-progress shake animation and timers
+      clearShakeTimers();
+
+      document.getElementById('feature-rows').classList.toggle('disabled', val === 'off');
+      document.getElementById('use_celsius').disabled = (val === 'off');
+      // If switching to Always On or Shake to Show and all features are off, turn them all on
+      if (val !== 'off') {
+        var allOff = !document.getElementById('show_weather').checked &&
+                     !document.getElementById('show_date').checked &&
+                     !document.getElementById('show_steps').checked;
+        if (allOff) {
+          document.getElementById('show_weather').checked = true;
+          document.getElementById('show_date').checked    = true;
+          document.getElementById('show_steps').checked   = true;
+          updateTempUnit();
+        }
+      }
+
+      _manualVisibility = true;
+      updateFeaturesPreview();
+      _manualVisibility = false;
+
+      if (val === 'shake') {
+        var watch    = document.getElementById('watch-preview');
+        var weather  = document.getElementById('preview-weather');
+        var calendar = document.getElementById('preview-calendar');
+        var steps    = document.getElementById('preview-steps');
+
+        // Hide features first
+        weather.classList.add('hidden');
+        calendar.classList.add('hidden');
+        steps.classList.add('hidden');
+
+        // Short pause, then shake
+        _shakeTimers.push(setTimeout(function() {
+          watch.classList.add('watch-shaking');
+
+          // Show features shortly into the shake (respect individual toggle states)
+          _shakeTimers.push(setTimeout(function() {
+            if (document.getElementById('show_weather').checked) weather.classList.remove('hidden');
+            if (document.getElementById('show_date').checked)    calendar.classList.remove('hidden');
+            if (document.getElementById('show_steps').checked)   steps.classList.remove('hidden');
+          }, 300));
+
+          // Remove shake class after animation completes
+          _shakeTimers.push(setTimeout(function() {
+            watch.classList.remove('watch-shaking');
+          }, 750));
+
+          // Hide features after 6 seconds
+          _shakeTimers.push(setTimeout(function() {
+            weather.classList.add('hidden');
+            calendar.classList.add('hidden');
+            steps.classList.add('hidden');
+          }, 3300));
+
+        }, 400));
+      }
+    }
+
+    function updateTempUnit() {
+      var showWeather = document.getElementById('show_weather').checked;
+      var subrow = document.getElementById('temp-unit-subrow');
+      subrow.style.opacity = showWeather ? '1' : '0.3';
+      subrow.style.pointerEvents = showWeather ? 'auto' : 'none';
+    }
 
 
-  Pebble.openURL(url);
-});
+    // Load saved settings
+    var savedTheme = getParam('theme', '0');
+    document.getElementById('show_weather').checked = getParam('show_weather', '1') === '1';
+    document.getElementById('show_date').checked    = getParam('show_date', '1') === '1';
+    document.getElementById('show_steps').checked   = getParam('show_steps', '1') === '1';
+    document.getElementById('use_celsius').value = getParam('use_celsius', '0');
+    document.getElementById('theme').value = savedTheme;
 
-// Receive device ID from watch
-Pebble.addEventListener('appmessage', function(e) {
-  if (e.payload.KEY_DEVICE_ID) {
-    localStorage.setItem('device_id', e.payload.KEY_DEVICE_ID);
-  }
-});
-
-// Handle settings return
-Pebble.addEventListener('webviewclosed', function(e) {
-  if (e.response && e.response !== 'CANCELLED') {
-    var settings = JSON.parse(decodeURIComponent(e.response));
-
-    // Save to localStorage
-    localStorage.setItem('theme',        settings.KEY_THEME);
-    localStorage.setItem('show_weather', settings.KEY_SHOW_WEATHER);
-    localStorage.setItem('show_date',    settings.KEY_SHOW_DATE);
-    localStorage.setItem('show_steps',   settings.KEY_SHOW_STEPS);
-    localStorage.setItem('use_celsius',  settings.KEY_USE_CELSIUS);
-    localStorage.setItem('visibility',   settings.KEY_VISIBILITY);
-
-    // Send all settings to watch
-    Pebble.sendAppMessage({
-      'KEY_THEME':        settings.KEY_THEME,
-      'KEY_SHOW_WEATHER': settings.KEY_SHOW_WEATHER,
-      'KEY_SHOW_DATE':    settings.KEY_SHOW_DATE,
-      'KEY_SHOW_STEPS':   settings.KEY_SHOW_STEPS,
-      'KEY_USE_CELSIUS':  settings.KEY_USE_CELSIUS,
-      'KEY_VISIBILITY':   settings.KEY_VISIBILITY
-    }, function() {
-      console.log('Settings sent to watch');
-      getWeather();
-    }, function(e) {
-      console.log('Settings send failed: ' + JSON.stringify(e));
+    updateFeaturesPreview();
+    var savedVisibility = getParam('visibility', 'on');
+    var visBtn = document.querySelector('#visibility-control button[data-value="' + savedVisibility + '"]');
+    document.querySelectorAll('#visibility-control button').forEach(function(b, i) {
+      if ((savedVisibility === 'on' && i === 0) || (savedVisibility === 'shake' && i === 1) || (savedVisibility === 'off' && i === 2)) {
+        b.classList.add('active');
+        if (savedVisibility === 'off') { document.getElementById('feature-rows').classList.add('disabled'); document.getElementById('use_celsius').disabled = true; }
+      } else {
+        b.classList.remove('active');
+      }
     });
-  }
-});
+    updateTempUnit();
 
-// Fetch weather on launch and every 30 minutes
-Pebble.addEventListener('ready', function() {
-  getWeather();
-  pingUsage();
-  setInterval(getWeather, 30 * 60 * 1000);
-});
+    // Set theme bar on load
+    document.getElementById('theme-name-bar').textContent = THEME_LABELS[savedTheme] || 'Tangerine';
 
-// Fetch weather when watch requests it
-Pebble.addEventListener('appmessage', function(e) {
-  getWeather();
-});
+    // Highlight saved theme
+    var savedOption = document.querySelector('.theme-option[data-value="' + savedTheme + '"]');
+    if (savedOption) savedOption.classList.add('selected');
+
+
+    function save() {
+      var themeIndex  = parseInt(document.getElementById('theme').value);
+      var showWeather = document.getElementById('show_weather').checked;
+      var showDate    = document.getElementById('show_date').checked;
+      var showSteps   = document.getElementById('show_steps').checked;
+      var useCelsius  = document.getElementById('use_celsius').value === '1';
+
+      var visButtons = document.querySelectorAll('#visibility-control button');
+      var visibility = 'on';
+      visButtons.forEach(function(b, i) { if (b.classList.contains('active')) visibility = ['on','shake','off'][i]; });
+
+      var settings = {
+        'KEY_THEME':        themeIndex,
+        'KEY_VISIBILITY':   visibility === 'on' ? 0 : visibility === 'shake' ? 1 : 2,
+        'KEY_SHOW_WEATHER': showWeather ? 1 : 0,
+        'KEY_SHOW_DATE':    showDate    ? 1 : 0,
+        'KEY_SHOW_STEPS':   showSteps   ? 1 : 0,
+        'KEY_USE_CELSIUS':  useCelsius  ? 1 : 0,
+      };
+
+      var location = 'pebblejs://close#' + encodeURIComponent(JSON.stringify(settings));
+      document.location = location;
+    }
+  </script>
+
+</body>
+</html>
