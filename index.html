@@ -737,7 +737,8 @@
         'KEY_USE_CELSIUS':  useCelsius  ? 1 : 0,
       };
 
-      var location = 'pebblejs://close#' + encodeURIComponent(JSON.stringify(settings));
+      var return_to = getParam('return_to', 'pebblejs://close');
+      var location = return_to + '#' + encodeURIComponent(JSON.stringify(settings));
       document.location = location;
     }
   </script>
