@@ -740,7 +740,10 @@
       };
 
       var return_to = getParam('return_to', 'pebblejs://close');
-      var location = return_to + '#' + encodeURIComponent(JSON.stringify(settings));
+      var encoded = encodeURIComponent(JSON.stringify(settings));
+      var location = return_to + '#' + encoded;
+      console.log('Saving with return_to: ' + return_to);
+      console.log('Settings: ' + JSON.stringify(settings));
       document.location = location;
     }
   </script>
