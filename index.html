@@ -420,7 +420,7 @@
     <div class="row" style="justify-content: center; border-bottom: 1px solid #333; padding-bottom: 14px;">
       <div class="segmented" id="visibility-control">
         <button class="active" onclick="setVisibility('on', this)">Always On</button>
-        <button onclick="setVisibility('shake', this)">Flick to Show</button>
+        <button onclick="setVisibility('flick', this)">Flick to Show</button>
         <button onclick="setVisibility('off', this)">Off</button>
       </div>
     </div>
@@ -567,7 +567,7 @@
       var active = document.querySelector('#visibility-control button.active');
       var buttons = document.querySelectorAll('#visibility-control button');
       for (var i = 0; i < buttons.length; i++) {
-        if (buttons[i].classList.contains('active')) return ['on','shake','off'][i];
+        if (buttons[i].classList.contains('active')) return ['on','flick','off'][i];
       }
       return 'on';
     }
@@ -642,7 +642,7 @@
       updateFeaturesPreview();
       _manualVisibility = false;
 
-      if (val === 'shake') {
+      if (val === 'flick') {
         var watch    = document.getElementById('watch-preview');
         var weather  = document.getElementById('preview-weather');
         var calendar = document.getElementById('preview-calendar');
@@ -697,12 +697,14 @@
     document.getElementById('theme').value = savedTheme;
 
     updateFeaturesPreview();
-    var savedVisibility = getParam('visibility', 'on');
-    var visBtn = document.querySelector('#visibility-control button[data-value="' + savedVisibility + '"]');
+    var savedVisibilityIndex = parseInt(getParam('visibility', '0'));
     document.querySelectorAll('#visibility-control button').forEach(function(b, i) {
-      if ((savedVisibility === 'on' && i === 0) || (savedVisibility === 'shake' && i === 1) || (savedVisibility === 'off' && i === 2)) {
+      if (i === savedVisibilityIndex) {
         b.classList.add('active');
-        if (savedVisibility === 'off') { document.getElementById('feature-rows').classList.add('disabled'); document.getElementById('use_celsius').disabled = true; }
+        if (savedVisibilityIndex === 2) {
+          document.getElementById('feature-rows').classList.add('disabled');
+          document.getElementById('use_celsius').disabled = true;
+        }
       } else {
         b.classList.remove('active');
       }
@@ -725,12 +727,12 @@
       var useCelsius  = document.getElementById('use_celsius').value === '1';
 
       var visButtons = document.querySelectorAll('#visibility-control button');
-      var visibility = 'on';
-      visButtons.forEach(function(b, i) { if (b.classList.contains('active')) visibility = ['on','shake','off'][i]; });
+      var visibilityIndex = 0;
+      visButtons.forEach(function(b, i) { if (b.classList.contains('active')) visibilityIndex = i; });
 
       var settings = {
         'KEY_THEME':        themeIndex,
-        'KEY_VISIBILITY':   visibility === 'on' ? 0 : visibility === 'shake' ? 1 : 2,
+        'KEY_VISIBILITY':   visibilityIndex,
         'KEY_SHOW_WEATHER': showWeather ? 1 : 0,
         'KEY_SHOW_DATE':    showDate    ? 1 : 0,
         'KEY_SHOW_STEPS':   showSteps   ? 1 : 0,
