@@ -741,6 +741,7 @@
 
       var encoded = encodeURIComponent(JSON.stringify(settings));
       var return_to = getParam('return_to', 'pebblejs://close#');
+      alert('return_to: ' + return_to + '\nencoded length: ' + encoded.length);
       document.location = return_to + encoded;
     }
   </script>
