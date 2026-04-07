@@ -740,10 +740,8 @@
       };
 
       var encoded = encodeURIComponent(JSON.stringify(settings));
-      var return_to = getParam('return_to', null);
-      var base = return_to ? decodeURIComponent(return_to) : 'pebblejs://close';
-      var location = base + '#' + encoded;
-      document.location = location;
+      var return_to = getParam('return_to', 'pebblejs://close#');
+      document.location = return_to + encoded;
     }
   </script>
 
