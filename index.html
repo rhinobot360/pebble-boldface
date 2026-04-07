@@ -716,7 +716,7 @@
 
     // Highlight saved theme
     var savedOption = document.querySelector('.theme-option[data-value="' + savedTheme + '"]');
-    if (savedOption) savedOption.classList.add('selected');
+    if (savedOption) selectTheme(savedOption);
 
 
     function save() {
