@@ -698,6 +698,7 @@
 
           // Hide features after 6 seconds
           _shakeTimers.push(setTimeout(function() {
+            battery.classList.add('hidden');
             weather.classList.add('hidden');
             calendar.classList.add('hidden');
             steps.classList.add('hidden');
