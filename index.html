@@ -647,14 +647,14 @@
 
       document.getElementById('feature-rows').classList.toggle('disabled', val === 'off');
       document.getElementById('use_celsius').disabled = (val === 'off');
-      // If switching to Always On or Flick to Show, always restore battery
-      // and turn all features on if all were off
+      // If switching to Always On or Flick to Show and all features are off, turn them all on
       if (val !== 'off') {
-        document.getElementById('show_battery').checked = true;
-        var allOff = !document.getElementById('show_weather').checked &&
+        var allOff = !document.getElementById('show_battery').checked &&
+                     !document.getElementById('show_weather').checked &&
                      !document.getElementById('show_date').checked &&
                      !document.getElementById('show_steps').checked;
         if (allOff) {
+          document.getElementById('show_battery').checked = true;
           document.getElementById('show_weather').checked = true;
           document.getElementById('show_date').checked    = true;
           document.getElementById('show_steps').checked   = true;
