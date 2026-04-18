@@ -366,6 +366,7 @@
   <div class="watch-preview-wrapper">
   <div class="watch-preview" id="watch-preview">
     <img src="watchface-tangerine.png" id="preview-watchface" alt="watchface">
+    <img src="watchface-tangerine-battery.png" id="preview-battery" class="layer-features" alt="battery">
     <img src="watchface-tangerine-calendar.png" id="preview-calendar" class="layer-features" alt="calendar">
     <img src="watchface-tangerine-weather.png" id="preview-weather" class="layer-features" alt="weather">
     <img src="watchface-tangerine-steps.png" id="preview-steps" class="layer-features" alt="steps">
@@ -425,6 +426,13 @@
       </div>
     </div>
     <div id="feature-rows" class="feature-rows">
+      <div class="row">
+        <label>Battery</label>
+        <label class="toggle">
+          <input type="checkbox" id="show_battery" checked onchange="updateFeaturesPreview();">
+          <span class="slider"></span>
+        </label>
+      </div>
       <div class="row">
         <label>Weather</label>
         <label class="toggle">
@@ -548,6 +556,17 @@
       '7': 'watchface-pink-lemonade-steps.png'
     };
 
+    var THEME_BATTERY = {
+      '0': 'watchface-tangerine-battery.png',
+      '1': 'watchface-blueberry-battery.png',
+      '2': 'watchface-lime-battery.png',
+      '3': 'watchface-licorice-battery.png',
+      '4': 'watchface-avocado-battery.png',
+      '5': 'watchface-cherry-battery.png',
+      '6': 'watchface-grape-battery.png',
+      '7': 'watchface-pink-lemonade-battery.png'
+    };
+
     function selectTheme(el) {
       document.querySelectorAll('.theme-option').forEach(function(o) {
         o.classList.remove('selected');
@@ -559,6 +578,7 @@
       document.getElementById('preview-calendar').src = THEME_CALENDAR[val] || 'watchface-tangerine-calendar.png';
       document.getElementById('preview-weather').src = THEME_WEATHER[val] || 'watchface-tangerine-weather.png';
       document.getElementById('preview-steps').src = THEME_STEPS[val] || 'watchface-tangerine-steps.png';
+      document.getElementById('preview-battery').src = THEME_BATTERY[val] || 'watchface-tangerine-battery.png';
       document.getElementById('theme-name-bar').textContent = THEME_LABELS[val] || 'Tangerine';
     }
 
@@ -574,10 +594,12 @@
 
     function updateFeaturesPreview() {
       var isOff = getVisibility() === 'off';
+      var showBattery = !isOff && document.getElementById('show_battery').checked;
       var showWeather = !isOff && document.getElementById('show_weather').checked;
       var showDate    = !isOff && document.getElementById('show_date').checked;
       var showSteps   = !isOff && document.getElementById('show_steps').checked;
 
+      document.getElementById('preview-battery').classList.toggle('hidden', !showBattery);
       document.getElementById('preview-weather').classList.toggle('hidden', !showWeather);
       document.getElementById('preview-calendar').classList.toggle('hidden', !showDate);
       document.getElementById('preview-steps').classList.toggle('hidden', !showSteps);
@@ -644,11 +666,13 @@
 
       if (val === 'flick') {
         var watch    = document.getElementById('watch-preview');
+        var battery  = document.getElementById('preview-battery');
         var weather  = document.getElementById('preview-weather');
         var calendar = document.getElementById('preview-calendar');
         var steps    = document.getElementById('preview-steps');
 
         // Hide features first
+        battery.classList.add('hidden');
         weather.classList.add('hidden');
         calendar.classList.add('hidden');
         steps.classList.add('hidden');
@@ -659,6 +683,7 @@
 
           // Show features shortly into the shake (respect individual toggle states)
           _shakeTimers.push(setTimeout(function() {
+            if (document.getElementById('show_battery').checked) battery.classList.remove('hidden');
             if (document.getElementById('show_weather').checked) weather.classList.remove('hidden');
             if (document.getElementById('show_date').checked)    calendar.classList.remove('hidden');
             if (document.getElementById('show_steps').checked)   steps.classList.remove('hidden');
@@ -690,6 +715,7 @@
 
     // Load saved settings
     var savedTheme = getParam('theme', '0');
+    document.getElementById('show_battery').checked = getParam('show_battery', '1') === '1';
     document.getElementById('show_weather').checked = getParam('show_weather', '1') === '1';
     document.getElementById('show_date').checked    = getParam('show_date', '1') === '1';
     document.getElementById('show_steps').checked   = getParam('show_steps', '1') === '1';
@@ -721,6 +747,7 @@
 
     function save() {
       var themeIndex  = parseInt(document.getElementById('theme').value);
+      var showBattery = document.getElementById('show_battery').checked;
       var showWeather = document.getElementById('show_weather').checked;
       var showDate    = document.getElementById('show_date').checked;
       var showSteps   = document.getElementById('show_steps').checked;
@@ -733,6 +760,7 @@
       var settings = {
         'KEY_THEME':        themeIndex,
         'KEY_VISIBILITY':   visibilityIndex,
+        'KEY_SHOW_BATTERY': showBattery ? 1 : 0,
         'KEY_SHOW_WEATHER': showWeather ? 1 : 0,
         'KEY_SHOW_DATE':    showDate    ? 1 : 0,
         'KEY_SHOW_STEPS':   showSteps   ? 1 : 0,
