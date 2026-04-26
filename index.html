@@ -606,7 +606,8 @@
 
       // Only auto-switch when user is toggling individual features, not manual visibility clicks
       if (!_manualVisibility) {
-        var allOff = !document.getElementById('show_weather').checked &&
+        var allOff = !document.getElementById('show_battery').checked &&
+                     !document.getElementById('show_weather').checked &&
                      !document.getElementById('show_date').checked &&
                      !document.getElementById('show_steps').checked;
 
