@@ -623,6 +623,18 @@
           buttons[0].classList.add('active'); // Always On button
           document.getElementById('feature-rows').classList.remove('disabled');
           document.getElementById('use_celsius').disabled = false;
+          
+          // Recalculate preview visibility now that we're not in Off mode
+          isOff = false;
+          showBattery = document.getElementById('show_battery').checked;
+          showWeather = document.getElementById('show_weather').checked;
+          showDate    = document.getElementById('show_date').checked;
+          showSteps   = document.getElementById('show_steps').checked;
+          
+          document.getElementById('preview-battery').classList.toggle('hidden', !showBattery);
+          document.getElementById('preview-weather').classList.toggle('hidden', !showWeather);
+          document.getElementById('preview-calendar').classList.toggle('hidden', !showDate);
+          document.getElementById('preview-steps').classList.toggle('hidden', !showSteps);
         }
       }
     }
